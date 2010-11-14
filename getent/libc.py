@@ -77,3 +77,6 @@ getservbyname.restype = POINTER(headers.ServiceStruct)
 getservbyport = libc.getservbyport
 getservbyport.argtypes = (c_int, c_char_p)
 getservbyport.restype = POINTER(headers.ServiceStruct)
+getspnam = libc.getspnam
+getspnam.argtypes = (c_char_p,)
+getspnam.restype = POINTER(headers.ShadowStruct)

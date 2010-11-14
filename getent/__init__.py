@@ -204,9 +204,9 @@ def service(search=None, proto=None):
     '''
     Perform a service lookup.
 
-    To show all services::
+    To lookup all services::
 
-        >>> for service in service():
+        >>> for item in service():
         ...
 
     To lookup one service by port number::
@@ -254,6 +254,19 @@ def service(search=None, proto=None):
             return Service(srv)
 
 def network(search=None):
+    '''
+    Perform a network lookup.
+
+    To lookup all services::
+
+        >>> for item in network():
+        ...
+
+    To lookup one network by name::
+
+        >>> net = network('link-local')
+
+    '''
     if search is None:
         setnetent()
         net = True
@@ -271,6 +284,27 @@ def network(search=None):
             return Network(net)
 
 def group(search=None):
+    '''
+    Perform a group lookup.
+
+    To lookup all groups::
+
+        >>> for item in group():
+        ...
+
+    To lookup one group by group id (gid)::
+
+        >>> root = group(0)
+        >>> print root.name
+        'root'
+
+    To lookup one group by name::
+
+        >>> root = group('root')
+        >>> print root.gid
+        0
+
+    '''
     # Iterate over all group entries
     if search is None:
         setgrent()
@@ -294,6 +328,27 @@ def group(search=None):
             return Group(grp)
 
 def passwd(search=None):
+    '''
+    Perform a passwd lookup.
+
+    To lookup all passwd entries::
+
+        >>> for item in passwd():
+        ...
+
+    To lookup one user by user id (uid)::
+
+        >>> root = passwd(0)
+        >>> print root.name
+        'root'
+
+    To lookup one user by name::
+
+        >>> root = passwd('root')
+        >>> print root.uid
+        0
+
+    '''
     # Iterate over all passwd entries
     if search is None:
         setpwent()
@@ -317,16 +372,37 @@ def passwd(search=None):
             return Passwd(pwd)
 
 def shadow(search=None):
+    '''
+    Perform a shadow lookup.
+
+    To lookup all shadow entries::
+
+        >>> for item in shadow():
+        ...
+
+    To lookup one user by name::
+
+        >>> root = shadow('root') 
+        >>> print root.warn # doctest: +SKIP
+        99999
+
+    '''
     # Iterate over all shadow entries
     if search is None:
         setspent()
-        p = True
-        r = []
-        while p:
-            p = getspent()
-            if p: r.append(Shadow(p))
+        spe = True
+        res = []
+        while spe:
+            spe = getspent()
+            if spe:
+                res.append(Shadow(spe))
         endspent()
-        return r
+        return res
+
+    else:
+        spe = getspnam(search)
+        if bool(spe):
+            return Shadow(spe)
 
 if __name__ == '__main__':
     print dict(host('127.0.0.1'))
