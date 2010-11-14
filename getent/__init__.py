@@ -55,6 +55,24 @@ class Host(StructMap):
             self._map('addr_list'))
 
 
+class Proto(StructMap):
+    def __init__(self, p):
+        super(Proto, self).__init__(p)
+        self.aliases = list(self._map('aliases'))
+
+
+class RPC(StructMap):
+    def __init__(self, p):
+        super(RPC, self).__init__(p)
+        self.aliases = list(self._map('aliases'))
+
+
+class Service(StructMap):
+    def __init__(self, p):
+        super(Service, self).__init__(p)
+        self.aliases = list(self._map('aliases'))
+
+
 class Network(StructMap):
     def __init__(self, p):
         super(Network, self).__init__(p)
@@ -83,6 +101,7 @@ class Shadow(StructMap):
         self.change = datetime.fromtimestamp(p.contents.change)
         self.expire = datetime.fromtimestamp(p.contents.expire)
 
+
 def alias(search=None):
     # Iterate over all alias entries
     if search is None:
@@ -95,7 +114,6 @@ def alias(search=None):
                 r.append(Alias(p))
         endaliasent()
         return r
-
 
 def host(search=None):
     # Iterate over all host entries
@@ -138,16 +156,114 @@ def host(search=None):
         if bool(host):
             return Host(host)
 
+def proto(search=None):
+    if search is None:
+        setprotoent()
+        prt = True
+        res = []
+        while prt:
+            prt = getprotoent()
+            if prt:
+                res.append(Proto(prt))
+        endprotoent()
+        return res
+
+    else:
+        search = str(search)
+        if search.isdigit():
+            prt = getprotobynumber(uid_t(long(search)))
+        else:
+            prt = getprotobyname(c_char_p(search))
+
+        if bool(prt):
+            return Proto(prt)
+
+def rpc(search=None):
+    if search is None:
+        setrpcent()
+        rpc = True
+        res = []
+        while rpc:
+            rpc = getrpcent()
+            if rpc:
+                res.append(RPC(rpc))
+        endrpcent()
+        return res
+
+    else:
+        search = str(search)
+        if search.isdigit():
+            rpc = getrpcbynumber(uid_t(long(search)))
+        else:
+            rpc = getrpcbyname(c_char_p(search))
+
+        if bool(rpc):
+            return RPC(rpc)
+
+def service(search=None, proto=None):
+    '''
+    Perform a service lookup.
+
+    To show all services::
+
+        >>> for service in service():
+        ...
+
+    To lookup one service by port number::
+
+        >>> http = service(0, 'tcp')
+        >>> print http.port
+        80
+
+    Or by service name::
+
+        >>> smtp = service('smtp', 'tcp')
+        >>> print smtp.port
+        25
+
+    Or by short notation::
+
+        >>> snmp = service('udp/snmp')
+        >>> print snmp.port
+        161
+
+    '''
+    if search is None:
+        setservent()
+        srv = True
+        res = []
+        while srv:
+            srv = getservent()
+            if srv:
+                res.append(Service(srv))
+        endservent()
+        return res
+
+    else:
+        search = str(search)
+        if not proto and '/' in search:
+            proto, search = search.split('/')
+        if not proto in ['tcp', 'udp']:
+            raise ValueError('Unsupported protocol "%s"' % (str(proto),))
+        if search.isdigit():
+            srv = getservbyport(uid_t(long(search)), c_char_p(proto))
+        else:
+            srv = getservbyname(c_char_p(search), c_char_p(proto))
+
+        if bool(srv):
+            return Service(srv)
+
 def network(search=None):
     if search is None:
         setnetent()
-        p = True
-        r = []
-        while p:
-            p = getnetent()
-            if p: r.append(Network(p))
+        net = True
+        res = []
+        while net:
+            net = getnetent()
+            if net:
+                res.append(Network(net))
         endnetent()
-        return r
+        return res
 
     else:
         net = getnetbyname(c_char_p(search))
@@ -158,25 +274,47 @@ def group(search=None):
     # Iterate over all group entries
     if search is None:
         setgrent()
-        p = True
-        r = []
-        while p:
-            p = getgrent()
-            if p: r.append(Group(p))
+        grp = True
+        res = []
+        while grp:
+            grp = getgrent()
+            if grp:
+                res.append(Group(grp))
         endgrent()
-        return r
+        return res
+
+    else:
+        search = str(search)
+        if search.isdigit():
+            grp = getpwuid(gid_t(long(search)))
+        else:
+            grp = getpwnam(c_char_p(search))
+
+        if bool(grp):
+            return Group(grp)
 
 def passwd(search=None):
     # Iterate over all passwd entries
     if search is None:
         setpwent()
-        p = True
-        r = []
-        while p:
-            p = getpwent()
-            if p: r.append(Passwd(p))
+        pwd = True
+        res = []
+        while pwd:
+            pwd = getpwent()
+            if pwd:
+                res.append(Passwd(pwd))
         endpwent()
-        return r
+        return res
+
+    else:
+        search = str(search)
+        if search.isdigit():
+            pwd = getpwuid(uid_t(long(search)))
+        else:
+            pwd = getpwnam(c_char_p(search))
+
+        if bool(pwd):
+            return Passwd(pwd)
 
 def shadow(search=None):
     # Iterate over all shadow entries
@@ -190,7 +328,6 @@ def shadow(search=None):
         endspent()
         return r
 
-
 if __name__ == '__main__':
     print dict(host('127.0.0.1'))
     print dict(host('localhost'))
@@ -199,6 +336,15 @@ if __name__ == '__main__':
         print dict(h)
 
     print dict(network('link-local') or {})
+
+    for p in proto():
+        print p.name, p.aliases
+
+    for r in rpc():
+        print r.name, r.aliases
+
+    for s in service():
+        print s.name, s.port, s.proto
 
     for n in network():
         print n.name, n.aliases

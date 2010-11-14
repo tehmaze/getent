@@ -3,3 +3,4 @@ syntax: glob
 *.pyo
 *.swp
 build/
+*.egg-info

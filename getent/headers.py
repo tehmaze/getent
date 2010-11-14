@@ -4,7 +4,7 @@ from getent.constants import *
 class AliasStruct(Structure):
     _fields_ = [
         ('name', c_char_p),
-        ('members_len', c_size_t),
+        ('members_len', size_t),
         ('members', POINTER(c_char_p)),
         ('local', c_int),
     ]
@@ -53,6 +53,34 @@ class NetworkStruct(Structure):
     ]
 
 
+class ProtoStruct(Structure):
+    # Taken from <netdb.h>
+    _fields_ = [
+        ('name', c_char_p),             # official protocol name
+        ('aliases', POINTER(c_char_p)), # alias list
+        ('proto', c_int),               # protocol number
+    ]
+
+
+class RPCStruct(Structure):
+    # Taken from <rpc/netdb.h>
+    _fields_ = [
+        ('name', c_char_p),             # name of server for this RPC program
+        ('aliases', POINTER(c_char_p)), # alias list
+        ('number', c_long),             # RPC program number
+    ]
+
+
+class ServiceStruct(Structure):
+    # Taken from <serv/netdb.h>
+    _fields_ = [
+        ('name', c_char_p),             # official service name
+        ('aliases', POINTER(c_char_p)), # alias list
+        ('port', c_int),                # port number
+        ('proto', c_char_p),            # protocol to use
+    ]
+
+
 class GroupStruct(Structure):
     # Taken from <grp.h>
     _fields_ = [
@@ -63,7 +91,7 @@ class GroupStruct(Structure):
     ]
 
 
-class PasswordStruct(Structure):
+class PasswdStruct(Structure):
     _fields_ = [
         ('name', c_char_p),
         ('password', c_char_p),

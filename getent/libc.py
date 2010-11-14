@@ -2,7 +2,11 @@ from getent.constants import *
 from getent import headers
 from ctypes.util import find_library
 
-__all__ = ['GENERATE_MAP', 'libc', 'inet_pton', 'gethostbyaddr', 'gethostbyname2', 'getnetbyname']
+__all__ = ['GENERATE_MAP', 'libc', 'inet_pton', 
+    'gethostbyaddr', 'gethostbyname2', 'getnetbyname',
+    'getgrnam', 'getgrgid', 'getpwnam', 'getpwuid',
+    'getprotobyname', 'getprotobynumber', 'getrpcbyname', 'getrpcbynumber',
+    'getservbyname', 'getservbyport']
 
 # Libc object
 libc = CDLL(find_library("c"))
@@ -11,8 +15,11 @@ GENERATE_MAP = dict(
     alias = headers.AliasStruct,
     host = headers.HostStruct,
     net = headers.NetworkStruct,
+    proto = headers.ProtoStruct,
+    rpc = headers.RPCStruct,
+    serv = headers.ServiceStruct,
     gr = headers.GroupStruct,
-    pw = headers.PasswordStruct,
+    pw = headers.PasswdStruct,
     sp = headers.ShadowStruct,
 )
 
@@ -40,3 +47,33 @@ gethostbyname2.restype = POINTER(headers.HostStruct)
 getnetbyname = libc.getnetbyname
 getnetbyname.argtypes = (c_char_p,)
 getnetbyname.restype = POINTER(headers.NetworkStruct)
+getgrnam = libc.getgrnam
+getgrnam.argtypes = (c_char_p,)
+getgrnam.restype = POINTER(headers.GroupStruct)
+getgrgid = libc.getgrnam
+getgrgid.argtypes = (gid_t,)
+getgrgid.restype = POINTER(headers.GroupStruct)
+getpwnam = libc.getpwnam
+getpwnam.argtypes = (c_char_p,)
+getpwnam.restype = POINTER(headers.PasswdStruct)
+getpwuid = libc.getpwuid
+getpwuid.argtypes = (uid_t,)
+getpwuid.restype = POINTER(headers.PasswdStruct)
+getprotobyname = libc.getprotobyname
+getprotobyname.argtypes = (c_char_p,)
+getprotobyname.restype = POINTER(headers.ProtoStruct)
+getprotobynumber = libc.getprotobynumber
+getprotobynumber.argtypes = (c_int,)
+getprotobynumber.restype = POINTER(headers.ProtoStruct)
+getrpcbyname = libc.getrpcbyname
+getrpcbyname.argtypes = (c_char_p,)
+getrpcbyname.restype = POINTER(headers.RPCStruct)
+getrpcbynumber = libc.getrpcbynumber
+getrpcbynumber.argtypes = (c_int,)
+getrpcbynumber.restype = POINTER(headers.RPCStruct)
+getservbyname = libc.getservbyname
+getservbyname.argtypes = (c_char_p, c_char_p)
+getservbyname.restype = POINTER(headers.ServiceStruct)
+getservbyport = libc.getservbyport
+getservbyport.argtypes = (c_int, c_char_p)
+getservbyport.restype = POINTER(headers.ServiceStruct)
