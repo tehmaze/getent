@@ -1,6 +1,7 @@
 from datetime import datetime
 import socket
 import struct
+import sys
 from getent.constants import *
 from getent.libc import *
 from getent import headers
@@ -103,7 +104,20 @@ class Shadow(StructMap):
 
 
 def alias(search=None):
-    # Iterate over all alias entries
+    '''
+    Perform a (mail) alias lookup.
+
+    To iterate over all alias entries::
+
+        >>> for item in alias():
+        ...
+
+    To lookup a single alias::
+
+        >>> mail = alias('postmaster')
+        >>> print mail.members
+        root
+    '''
     if search is None:
         setaliasent()
         p = True
@@ -116,7 +130,22 @@ def alias(search=None):
         return r
 
 def host(search=None):
-    # Iterate over all host entries
+    '''
+    Perform a host(s) lookup.
+
+    To iterate over all host entries::
+
+        >>> for item in host():
+        ...
+
+    To lookup a single host by name::
+
+        >>> import socket
+        >>> server = host('localhost')
+        >>> server.addrtype in [socket.AF_INET, socket.AF_INET6]
+        True
+
+    '''
     if search is None:
         sethostent()
         p = True
@@ -157,6 +186,20 @@ def host(search=None):
             return Host(host)
 
 def proto(search=None):
+    '''
+    Perform a protocol lookup.
+
+    To lookup all protocols::
+
+        >>> for item in proto():
+        ...
+
+    To lookup a single protocol number::
+
+        >>> tcp = proto('tcp')
+        >>> print tcp.proto
+        6
+    '''
     if search is None:
         setprotoent()
         prt = True
@@ -179,6 +222,23 @@ def proto(search=None):
             return Proto(prt)
 
 def rpc(search=None):
+    '''
+    Perform a remote procedure call lookup.
+
+    To lookup all rpc services::
+
+        >>> for item in rpc():
+        ...
+
+    To lookup one rpc service by name::
+
+        >>> nfs = rpc('nfs')
+        >>> print nfs.number
+        100003
+        >>> print nfs.aliases
+        ['portmap', 'sunrpc']
+
+    '''
     if search is None:
         setrpcent()
         rpc = True
@@ -389,6 +449,8 @@ def shadow(search=None):
     '''
     # Iterate over all shadow entries
     if search is None:
+        if setspent is None:
+            raise NotImplementedError('Not available on %s' % (sys.platform,))
         setspent()
         spe = True
         res = []
@@ -431,5 +493,8 @@ if __name__ == '__main__':
     for p in passwd():
         print p.name, p.shell, p.dir, dict(p)
 
-    for s in shadow():
-        print s.name, s.change, s.expire, dict(s)
+    try:
+        for s in shadow():
+            print s.name, s.change, s.expire, dict(s)
+    except NotImplementedError, e:
+        print 'shadow() failed:', e
