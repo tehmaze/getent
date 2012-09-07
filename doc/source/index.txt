@@ -1,0 +1,59 @@
+.. getent documentation master file, created by
+   sphinx-quickstart on Fri Sep  7 11:41:28 2012.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+
+========
+ getent
+========
+
+Python interface to the POSIX getent family of commands (getpwent, getgrent,
+getnetent, etc.)
+
+
+Usage
+=====
+
+Here a few examples.
+
+Load the interface::
+
+    >>> import getent
+
+Doing a passwd lookup::
+
+    >>> print dict(getent.passwd('root'))
+    {'dir': '/root',
+     'gecos': 'root',
+     'gid': 0,
+     'name': 'root',
+     'password': 'x',
+     'shell': '/bin/bash',
+     'uid': 0}
+
+Doing a group lookup::
+
+    >>> print dict(getent.group('root'))
+    {'gid': 0, 'members': [], 'name': 'root', 'password': 'x'}
+
+
+Bugs/Features
+-------------
+
+You can issue a ticket in GitHub: https://github.com/tehmaze/getent/issues
+
+Download
+--------
+
+Get your copy of getent from pypi: http://pypi.python.org/pypi/getent
+
+.. automodule:: getent
+   :members:
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
