@@ -320,9 +320,9 @@ def group(search=None):
     else:
         search = str(search)
         if search.isdigit():
-            grp = getpwuid(gid_t(long(search)))
+            grp = getgrgid(gid_t(long(search)))
         else:
-            grp = getpwnam(c_char_p(search))
+            grp = getgrnam(c_char_p(search))
 
         if bool(grp):
             return Group(grp)
