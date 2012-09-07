@@ -26,10 +26,11 @@ GENERATE_MAP = dict(
 # Map libc function calls
 for name, struct in GENERATE_MAP.iteritems():
     base = '%sent' % (name,)
-    globals()['set%s' % (base,)] = getattr(libc, 'set%s' % (base,))
-    globals()['get%s' % (base,)] = getattr(libc, 'get%s' % (base,))
-    globals()['get%s' % (base,)].restype = POINTER(struct)
-    globals()['end%s' % (base,)] = getattr(libc, 'end%s' % (base,))
+    globals()['set%s' % (base,)] = getattr(libc, 'set%s' % (base,), None)
+    globals()['get%s' % (base,)] = getattr(libc, 'get%s' % (base,), None)
+    if globals()['get%s' % (base,)] is not None:
+        globals()['get%s' % (base,)].restype = POINTER(struct)
+    globals()['end%s' % (base,)] = getattr(libc, 'end%s' % (base,), None)
     __all__.append('set%s' % (base,))
     __all__.append('get%s' % (base,))
     __all__.append('end%s' % (base,))
@@ -77,6 +78,10 @@ getservbyname.restype = POINTER(headers.ServiceStruct)
 getservbyport = libc.getservbyport
 getservbyport.argtypes = (c_int, c_char_p)
 getservbyport.restype = POINTER(headers.ServiceStruct)
-getspnam = libc.getspnam
-getspnam.argtypes = (c_char_p,)
-getspnam.restype = POINTER(headers.ShadowStruct)
+# Not supported on all platforms
+try:
+    getspnam = libc.getspnam
+    getspnam.argtypes = (c_char_p,)
+    getspnam.restype = POINTER(headers.ShadowStruct)
+except AttributeError:
+    getspnam = None
