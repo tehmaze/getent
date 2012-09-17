@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Getent : Python interface to the POSIX getent family of commands (getpwent, getgrent, getnetent, etc.)" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Getent</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tehmaze/getent">View on GitHub</a>
+
+          <h1 id="project_title">Getent</h1>
+          <h2 id="project_tagline">Python interface to the POSIX getent family of commands (getpwent, getgrent, getnetent, etc.)</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/tehmaze/getent/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/tehmaze/getent/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1></h1>
+
+<h1> getent</h1>
+
+<p>Python interface to the POSIX getent family of commands (getpwent, getgrent, getnetent, etc.)</p>
+
+<h1>Usage</h1>
+
+<p>Here a few examples.</p>
+
+<p>Load the interface:</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">getent</span>
+</pre></div>
+
+<p>Doing a passwd lookup:</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="nb">dict</span><span class="p">(</span><span class="n">getent</span><span class="o">.</span><span class="n">passwd</span><span class="p">(</span><span class="s">'root'</span><span class="p">))</span>
+<span class="p">{</span><span class="s">'dir'</span><span class="p">:</span> <span class="s">'/root'</span><span class="p">,</span>
+ <span class="s">'gecos'</span><span class="p">:</span> <span class="s">'root'</span><span class="p">,</span>
+ <span class="s">'gid'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+ <span class="s">'name'</span><span class="p">:</span> <span class="s">'root'</span><span class="p">,</span>
+ <span class="s">'password'</span><span class="p">:</span> <span class="s">'x'</span><span class="p">,</span>
+ <span class="s">'shell'</span><span class="p">:</span> <span class="s">'/bin/bash'</span><span class="p">,</span>
+ <span class="s">'uid'</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+</pre></div>
+
+<p>Doing a group lookup:</p>
+
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span> <span class="nb">dict</span><span class="p">(</span><span class="n">getent</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">'root'</span><span class="p">))</span>
+<span class="p">{</span><span class="s">'gid'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">'members'</span><span class="p">:</span> <span class="p">[],</span> <span class="s">'name'</span><span class="p">:</span> <span class="s">'root'</span><span class="p">,</span> <span class="s">'password'</span><span class="p">:</span> <span class="s">'x'</span><span class="p">}</span>
+</pre></div>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Getent maintained by <a href="https://github.com/tehmaze">tehmaze</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
