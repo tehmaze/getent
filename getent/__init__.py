@@ -43,8 +43,7 @@ def _resolve(addrtype, addr):
         return socket.inet_ntop(addrtype, packed)
     elif addrtype == AF_INET6:
         p = cast(addr, POINTER(headers.InAddr6Struct))
-        packed = ''.join(map(lambda bit: struct.pack('<L', bit),
-            p.contents.in6_u.u6_addr32))
+        packed = ''.join([struct.pack('<L', bit) for bit in p.contents.in6_u.u6_addr32])
         return socket.inet_ntop(addrtype, packed)
 
 
@@ -52,8 +51,7 @@ class Host(StructMap):
     def __init__(self, p):
         super(Host, self).__init__(p)
         self.aliases = list(self._map('aliases'))
-        self.addresses = map(lambda addr: _resolve(self.addrtype, addr), 
-            self._map('addr_list'))
+        self.addresses = [_resolve(self.addrtype, addr) for addr in self._map('addr_list')]
 
 
 class Proto(StructMap):
@@ -214,7 +212,7 @@ def proto(search=None):
     else:
         search = str(search)
         if search.isdigit():
-            prt = getprotobynumber(uid_t(long(search)))
+            prt = getprotobynumber(uid_t(int(search)))
         else:
             prt = getprotobyname(c_char_p(search))
 
@@ -253,7 +251,7 @@ def rpc(search=None):
     else:
         search = str(search)
         if search.isdigit():
-            rpc = getrpcbynumber(uid_t(long(search)))
+            rpc = getrpcbynumber(uid_t(int(search)))
         else:
             rpc = getrpcbyname(c_char_p(search))
 
@@ -306,7 +304,7 @@ def service(search=None, proto=None):
         if not proto in ['tcp', 'udp']:
             raise ValueError('Unsupported protocol "%s"' % (str(proto),))
         if search.isdigit():
-            srv = getservbyport(uid_t(long(search)), c_char_p(proto))
+            srv = getservbyport(uid_t(int(search)), c_char_p(proto))
         else:
             srv = getservbyname(c_char_p(search), c_char_p(proto))
 
@@ -380,7 +378,7 @@ def group(search=None):
     else:
         search = str(search)
         if search.isdigit():
-            grp = getgrgid(gid_t(long(search)))
+            grp = getgrgid(gid_t(int(search)))
         else:
             grp = getgrnam(c_char_p(search))
 
@@ -424,7 +422,7 @@ def passwd(search=None):
     else:
         search = str(search)
         if search.isdigit():
-            pwd = getpwuid(uid_t(long(search)))
+            pwd = getpwuid(uid_t(int(search)))
         else:
             pwd = getpwnam(c_char_p(search))
 
@@ -467,34 +465,34 @@ def shadow(search=None):
             return Shadow(spe)
 
 if __name__ == '__main__':
-    print dict(host('127.0.0.1'))
-    print dict(host('localhost'))
+    print(dict(host('127.0.0.1')))
+    print(dict(host('localhost')))
 
     for h in host():
-        print dict(h)
+        print(dict(h))
 
-    print dict(network('link-local') or {})
+    print(dict(network('link-local') or {}))
 
     for p in proto():
-        print p.name, p.aliases
+        print(p.name, p.aliases)
 
     for r in rpc():
-        print r.name, r.aliases
+        print(r.name, r.aliases)
 
     for s in service():
-        print s.name, s.port, s.proto
+        print(s.name, s.port, s.proto)
 
     for n in network():
-        print n.name, n.aliases
+        print(n.name, n.aliases)
 
     for g in group():
-        print g.name, g.members, dict(g)
+        print(g.name, g.members, dict(g))
 
     for p in passwd():
-        print p.name, p.shell, p.dir, dict(p)
+        print(p.name, p.shell, p.dir, dict(p))
 
     try:
         for s in shadow():
-            print s.name, s.change, s.expire, dict(s)
-    except NotImplementedError, e:
-        print 'shadow() failed:', e
+            print(s.name, s.change, s.expire, dict(s))
+    except NotImplementedError as e:
+        print('shadow() failed:', e)

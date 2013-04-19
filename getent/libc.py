@@ -24,7 +24,7 @@ GENERATE_MAP = dict(
 )
 
 # Map libc function calls
-for name, struct in GENERATE_MAP.iteritems():
+for name, struct in GENERATE_MAP.items():
     base = '%sent' % (name,)
     globals()['set%s' % (base,)] = getattr(libc, 'set%s' % (base,), None)
     globals()['get%s' % (base,)] = getattr(libc, 'get%s' % (base,), None)
