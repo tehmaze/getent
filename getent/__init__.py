@@ -2,35 +2,52 @@ from datetime import datetime
 import socket
 import struct
 import sys
-from getent.constants import *
-from getent.libc import *
+from getent.constants import * # NOQA
+from getent.libc import * # NOQA
 from getent import headers
 
 
+if sys.version_info[0] < 3:
+    def convert23(value):
+        return value
+
+else:
+    def convert23(value): # NOQA
+        return value.decode('utf-8') if isinstance(value, bytes) else value
+
+
 class StructMap(object):
+
     def __init__(self, p):
         self.p = p
+
         for attr in dir(self.p.contents):
+
             if attr.startswith('_'):
                 continue
+
             elif not hasattr(self, attr):
-                setattr(self, attr, getattr(self.p.contents, attr))
+                value = getattr(self.p.contents, attr)
+                setattr(self, attr, convert23(value))
 
     def __dict__(self):
         return dict(iter(self))
 
     def __iter__(self):
         for attr in dir(self.p.contents):
+
             if attr.startswith('_'):
                 continue
+
             else:
                 yield (attr, getattr(self, attr))
 
     def _map(self, attr):
         i = 0
         obj = getattr(self.p.contents, attr)
+
         while obj[i]:
-            yield obj[i]
+            yield convert23(obj[i])
             i += 1
 
 
@@ -43,7 +60,8 @@ def _resolve(addrtype, addr):
         return socket.inet_ntop(addrtype, packed)
     elif addrtype == AF_INET6:
         p = cast(addr, POINTER(headers.InAddr6Struct))
-        packed = ''.join([struct.pack('<L', bit) for bit in p.contents.in6_u.u6_addr32])
+        packed = ''.join([struct.pack('<L', bit)
+                         for bit in p.contents.in6_u.u6_addr32])
         return socket.inet_ntop(addrtype, packed)
 
 
@@ -51,7 +69,8 @@ class Host(StructMap):
     def __init__(self, p):
         super(Host, self).__init__(p)
         self.aliases = list(self._map('aliases'))
-        self.addresses = [_resolve(self.addrtype, addr) for addr in self._map('addr_list')]
+        self.addresses = [_resolve(self.addrtype, addr)
+                          for addr in self._map('addr_list')]
 
 
 class Proto(StructMap):
@@ -127,6 +146,7 @@ def alias(search=None):
         endaliasent()
         return r
 
+
 def host(search=None):
     '''
     Perform a host(s) lookup.
@@ -183,6 +203,7 @@ def host(search=None):
         if bool(host):
             return Host(host)
 
+
 def proto(search=None):
     '''
     Perform a protocol lookup.
@@ -218,6 +239,7 @@ def proto(search=None):
 
         if bool(prt):
             return Proto(prt)
+
 
 def rpc(search=None):
     '''
@@ -257,6 +279,7 @@ def rpc(search=None):
 
         if bool(rpc):
             return RPC(rpc)
+
 
 def service(search=None, proto=None):
     '''
@@ -311,6 +334,7 @@ def service(search=None, proto=None):
         if bool(srv):
             return Service(srv)
 
+
 def network(search=None):
     '''
     Perform a network lookup.
@@ -340,6 +364,7 @@ def network(search=None):
         net = getnetbyname(c_char_p(search))
         if bool(net):
             return Network(net)
+
 
 def group(search=None):
     '''
@@ -385,6 +410,7 @@ def group(search=None):
         if bool(grp):
             return Group(grp)
 
+
 def passwd(search=None):
     '''
     Perform a passwd lookup.
@@ -429,6 +455,7 @@ def passwd(search=None):
         if bool(pwd):
             return Passwd(pwd)
 
+
 def shadow(search=None):
     '''
     Perform a shadow lookup.
@@ -440,7 +467,7 @@ def shadow(search=None):
 
     To lookup one user by name::
 
-        >>> root = shadow('root') 
+        >>> root = shadow('root')
         >>> print root.warn # doctest: +SKIP
         99999
 
@@ -463,6 +490,7 @@ def shadow(search=None):
         spe = getspnam(search)
         if bool(spe):
             return Shadow(spe)
+
 
 if __name__ == '__main__':
     print(dict(host('127.0.0.1')))
