@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name         = 'getent',
-    version      = '0.1.1',
+    version      = '0.2',
     author       = 'Wijnand Modderman-Lenstra',
     author_email = 'maze@pyth0n.org',
     description  = 'Python interface to the POSIX getent family of commands',

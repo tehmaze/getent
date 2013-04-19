@@ -29,3 +29,19 @@ Doing a group lookup::
 
     >>> print dict(getent.group('root'))
     {'gid': 0, 'members': [], 'name': 'root', 'password': 'x'}
+
+
+Bugs
+====
+
+Please use the `bug tracker at GitHub`_ for bugs or feature requests.
+
+.. _bug tracker at GitHub: https://github.com/tehmaze/getent/issues
+
+
+Authors
+=======
+
+* `Wijnand Modderman-Lenstra <https://maze.io/>`_
+* Thomas Kula
+* `Olivier Cortès <http://oliviercortes.com/>`_
