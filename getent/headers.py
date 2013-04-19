@@ -1,11 +1,11 @@
-from getent.constants import *
+from getent.constants import * # NOQA
 
 
 class AliasStruct(Structure):
     _fields_ = [
-        ('name', c_char_p),
+        ('name', ctypes_c_char_p),
         ('members_len', size_t),
-        ('members', POINTER(c_char_p)),
+        ('members', POINTER(ctypes_c_char_p)),
         ('local', c_int),
     ]
 
@@ -35,8 +35,8 @@ class InAddr6Struct(Structure):
 
 class HostStruct(Structure):
     _fields_ = [
-        ('name', c_char_p),
-        ('aliases', POINTER(c_char_p)),
+        ('name', ctypes_c_char_p),
+        ('aliases', POINTER(ctypes_c_char_p)),
         ('addrtype', c_int),
         ('addr_list_len', c_int),
         ('addr_list', POINTER(c_void_p)),
@@ -46,18 +46,18 @@ class HostStruct(Structure):
 class NetworkStruct(Structure):
     # Taken from <netdb.h>
     _fields_ = [
-        ('name', c_char_p),             # official network name
-        ('aliases', POINTER(c_char_p)), # alias list
+        ('name', ctypes_c_char_p),              # official network name
+        ('aliases', POINTER(ctypes_c_char_p)),  # alias list
         ('addrtype', c_int),            # net address type
-        ('net', uint32_t),              # network number 
+        ('net', uint32_t),              # network number
     ]
 
 
 class ProtoStruct(Structure):
     # Taken from <netdb.h>
     _fields_ = [
-        ('name', c_char_p),             # official protocol name
-        ('aliases', POINTER(c_char_p)), # alias list
+        ('name', ctypes_c_char_p),              # official protocol name
+        ('aliases', POINTER(ctypes_c_char_p)),  # alias list
         ('proto', c_int),               # protocol number
     ]
 
@@ -65,8 +65,8 @@ class ProtoStruct(Structure):
 class RPCStruct(Structure):
     # Taken from <rpc/netdb.h>
     _fields_ = [
-        ('name', c_char_p),             # name of server for this RPC program
-        ('aliases', POINTER(c_char_p)), # alias list
+        ('name', ctypes_c_char_p),              # name of server for RPC program
+        ('aliases', POINTER(ctypes_c_char_p)),  # alias list
         ('number', c_long),             # RPC program number
     ]
 
@@ -74,39 +74,39 @@ class RPCStruct(Structure):
 class ServiceStruct(Structure):
     # Taken from <serv/netdb.h>
     _fields_ = [
-        ('name', c_char_p),             # official service name
-        ('aliases', POINTER(c_char_p)), # alias list
+        ('name', ctypes_c_char_p),              # official service name
+        ('aliases', POINTER(ctypes_c_char_p)),  # alias list
         ('port', c_int),                # port number
-        ('proto', c_char_p),            # protocol to use
+        ('proto', ctypes_c_char_p),            # protocol to use
     ]
 
 
 class GroupStruct(Structure):
     # Taken from <grp.h>
     _fields_ = [
-        ("name", c_char_p),
-        ("password", c_char_p),
+        ("name", ctypes_c_char_p),
+        ("password", ctypes_c_char_p),
         ("gid", c_int),
-        ("members", POINTER(c_char_p)),
+        ("members", POINTER(ctypes_c_char_p)),
     ]
 
 
 class PasswdStruct(Structure):
     _fields_ = [
-        ('name', c_char_p),
-        ('password', c_char_p),
+        ('name', ctypes_c_char_p),
+        ('password', ctypes_c_char_p),
         ('uid', c_int),
         ('gid', c_int),
-        ('gecos', c_char_p),
-        ('dir', c_char_p),
-        ('shell', c_char_p),
+        ('gecos', ctypes_c_char_p),
+        ('dir', ctypes_c_char_p),
+        ('shell', ctypes_c_char_p),
     ]
 
 
 class ShadowStruct(Structure):
     _fields_ = [
-        ('name', c_char_p),
-        ('password', c_char_p),
+        ('name', ctypes_c_char_p),
+        ('password', ctypes_c_char_p),
         ('change', c_long),
         ('min', c_long),
         ('max', c_long),
