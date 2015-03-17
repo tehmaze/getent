@@ -45,3 +45,13 @@ Authors
 * `Wijnand Modderman-Lenstra <https://maze.io/>`_
 * Thomas Kula
 * `Olivier Cortès <http://oliviercortes.com/>`_
+
+
+Build status
+============
+
+.. image:: https://landscape.io/github/tehmaze/getent/master/landscape.svg
+   :target: https://landscape.io/github/tehmaze/getent/master
+
+.. image:: https://travis-ci.org/tehmaze/getent.svg
+   :target: https://travis-ci.org/tehmaze/getent
