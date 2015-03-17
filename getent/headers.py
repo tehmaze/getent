@@ -1,7 +1,34 @@
-from getent.constants import * # NOQA
+"""Headers for the getent package."""
+
+# pylint: disable=too-few-public-methods
+
+from ctypes import ARRAY, POINTER
+from ctypes import Structure, Union
+from ctypes import c_int, c_long, c_ulong, c_void_p
+
+from getent.constants import ctypes_c_char_p
+from getent.constants import size_t, uint8_t, uint16_t, uint32_t
+
+__all__ = (
+    'AliasStruct',
+    'GroupStruct',
+    'HostStruct',
+    'InAddr6Struct',
+    'InAddr6Union',
+    'InAddrStruct',
+    'NetworkStruct',
+    'PasswdStruct',
+    'ProtoStruct',
+    'RPCStruct',
+    'ServiceStruct',
+    'ShadowStruct',
+)
 
 
 class AliasStruct(Structure):
+
+    """Struct `aliasent` from `<aliasent.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),
         ('members_len', size_t),
@@ -11,13 +38,18 @@ class AliasStruct(Structure):
 
 
 class InAddrStruct(Structure):
-    # Taken from <netinet/in.h>
+
+    """Struct `in_addr` from `<netinet/in.h>`."""
+
     _fields_ = [
         ('s_addr', uint32_t),
     ]
 
 
 class InAddr6Union(Union):
+
+    """Struct `in_addr6` from `<netinet6/in6.h>`."""
+
     _fields_ = [
         ('u6_addr8', ARRAY(uint8_t, 16)),
         ('u6_addr16', ARRAY(uint16_t, 8)),
@@ -26,7 +58,9 @@ class InAddr6Union(Union):
 
 
 class InAddr6Struct(Structure):
-    # Taken from <netinet/in.h>
+
+    """Struct `in_addr6` from `<netinet6/in6.h>`."""
+
     _anonymous_ = ('in6_u',)
     _fields_ = [
         ('in6_u', InAddr6Union),
@@ -34,6 +68,9 @@ class InAddr6Struct(Structure):
 
 
 class HostStruct(Structure):
+
+    """Struct `hostent` from `<netdb.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),
         ('aliases', POINTER(ctypes_c_char_p)),
@@ -44,7 +81,9 @@ class HostStruct(Structure):
 
 
 class NetworkStruct(Structure):
-    # Taken from <netdb.h>
+
+    """Struct `netent` from `<netdb.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),              # official network name
         ('aliases', POINTER(ctypes_c_char_p)),  # alias list
@@ -54,7 +93,9 @@ class NetworkStruct(Structure):
 
 
 class ProtoStruct(Structure):
-    # Taken from <netdb.h>
+
+    """Struct `protoent` from `<netdb.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),              # official protocol name
         ('aliases', POINTER(ctypes_c_char_p)),  # alias list
@@ -63,16 +104,23 @@ class ProtoStruct(Structure):
 
 
 class RPCStruct(Structure):
-    # Taken from <rpc/netdb.h>
+
+    """Struct `rpcent` from `<netdb.h>`."""
+
     _fields_ = [
-        ('name', ctypes_c_char_p),              # name of server for RPC program
-        ('aliases', POINTER(ctypes_c_char_p)),  # alias list
-        ('number', c_long),             # RPC program number
+        # Name of server for RPC program
+        ('name', ctypes_c_char_p),
+        # Alias list
+        ('aliases', POINTER(ctypes_c_char_p)),
+        # RPC program number
+        ('number', c_long),
     ]
 
 
 class ServiceStruct(Structure):
-    # Taken from <serv/netdb.h>
+
+    """Struct `servent` from `<netdb.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),              # official service name
         ('aliases', POINTER(ctypes_c_char_p)),  # alias list
@@ -82,7 +130,9 @@ class ServiceStruct(Structure):
 
 
 class GroupStruct(Structure):
-    # Taken from <grp.h>
+
+    """Struct `group` from `<grp.h>`."""
+
     _fields_ = [
         ("name", ctypes_c_char_p),
         ("password", ctypes_c_char_p),
@@ -92,6 +142,9 @@ class GroupStruct(Structure):
 
 
 class PasswdStruct(Structure):
+
+    """Struct `passwd` from `<pwd.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),
         ('password', ctypes_c_char_p),
@@ -104,6 +157,9 @@ class PasswdStruct(Structure):
 
 
 class ShadowStruct(Structure):
+
+    """Struct `spwd` from `<shadow.h>`."""
+
     _fields_ = [
         ('name', ctypes_c_char_p),
         ('password', ctypes_c_char_p),

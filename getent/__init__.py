@@ -1,24 +1,94 @@
-from datetime import datetime
+"""Getent offers libc type lookup functions."""
+
+# pylint: disable=too-few-public-methods
+
 import socket
 import struct
 import sys
-from getent.constants import * # NOQA
-from getent.libc import * # NOQA
-from getent import headers
+from ctypes import POINTER, cast, create_string_buffer, pointer
+from datetime import datetime
 
+from getent import headers
+from getent.constants import (
+    AF_INET,
+    AF_INET6,
+    IN6ADDRSZ,
+    INADDRSZ,
+    c_char_p,
+    gid_t,
+    uid_t
+)
+from getent.libc import (
+    getspnam,
+    getpwnam,
+    getpwuid,
+    endaliasent,
+    endgrent,
+    endhostent,
+    endnetent,
+    endprotoent,
+    endpwent,
+    endrpcent,
+    endservent,
+    endspent,
+    getaliasent,
+    getgrent,
+    getgrgid,
+    getgrnam,
+    getrpcbyname,
+    getrpcbynumber,
+    gethostbyaddr,
+    gethostbyname2,
+    gethostent,
+    getnetent,
+    getprotobyname,
+    getprotobynumber,
+    getprotoent,
+    getpwent,
+    getrpcent,
+    getservent,
+    getspent,
+    inet_pton,
+    setaliasent,
+    setgrent,
+    sethostent,
+    setnetent,
+    setprotoent,
+    setpwent,
+    setrpcent,
+    setservent,
+    setspent,
+    getnetbyname,
+    getservbyname,
+    getservbyport
+)
+
+__all__ = (
+    'alias', 'group', 'host', 'network', 'passwd', 'proto', 'rpc', 'service',
+    'shadow'
+)
 
 if sys.version_info[0] < 3:
     def convert23(value):
+        """Python 2/3 compatibility function for emitting encoded strings."""
         return value
 
 else:
-    def convert23(value): # NOQA
+    def convert23(value):
+        """Python 2/3 compatibility function for emitting encoded strings."""
         return value.decode('utf-8') if isinstance(value, bytes) else value
 
 
 class StructMap(object):
 
+    """Base class for mapped C structs."""
+
     def __init__(self, p):
+        """Generic struct constructor.
+
+        Will also define getter and setter attributes on the instance for all
+        struct members.
+        """
         self.p = p
 
         for attr in dir(self.p.contents):
@@ -30,12 +100,12 @@ class StructMap(object):
                 value = getattr(self.p.contents, attr)
                 setattr(self, attr, convert23(value))
 
-    def __dict__(self):
-        return dict(iter(self))
-
     def __iter__(self):
-        for attr in dir(self.p.contents):
+        """Iterate over the mapped struct members.
 
+        Yields `(key, value)` pairs.
+        """
+        for attr in dir(self.p.contents):
             if attr.startswith('_'):
                 continue
 
@@ -60,12 +130,35 @@ def _resolve(addrtype, addr):
         return socket.inet_ntop(addrtype, packed)
     elif addrtype == AF_INET6:
         p = cast(addr, POINTER(headers.InAddr6Struct))
-        packed = ''.join([struct.pack('<L', bit)
-                         for bit in p.contents.in6_u.u6_addr32])
+        packed = ''.join([
+            struct.pack('<L', bit)
+            for bit in p.contents.in6_u.u6_addr32
+        ])
         return socket.inet_ntop(addrtype, packed)
 
 
+# pep257: disable=D102
+
 class Host(StructMap):
+
+    """Struct ``hostent`` from ``<netdb.h>``.
+
+    .. py:attribute:: name
+
+       Official name of the host.
+
+    .. py:attribute:: aliases
+
+       List of alternative names for the host.
+
+    .. py:attribute:: addresses
+
+       List of network addresses for the host.
+
+    """
+
+    addrtype = socket.AF_INET
+
     def __init__(self, p):
         super(Host, self).__init__(p)
         self.aliases = list(self._map('aliases'))
@@ -74,46 +167,222 @@ class Host(StructMap):
 
 
 class Proto(StructMap):
+
+    """Struct ``protoent`` from ``<netdb.h>``.
+
+    .. py:attribute:: name
+
+       The official name of the protocol.
+
+    .. py:attribute:: aliases
+
+       List of alternative names for the protocol.
+
+    .. py:attribute:: proto
+
+       The protocol number.
+    """
+
     def __init__(self, p):
         super(Proto, self).__init__(p)
         self.aliases = list(self._map('aliases'))
 
 
 class RPC(StructMap):
+
+    """Struct ``rpcent`` from ``<netdb.h>``.
+
+    .. py:attribute:: name
+
+       The name of the server for this RPC program.
+
+    .. py:attribute:: aliases
+
+       List of alternate names for the RPC program.
+
+    .. py:attribute:: number
+
+       The RPC program number for this service.
+    """
+
     def __init__(self, p):
         super(RPC, self).__init__(p)
         self.aliases = list(self._map('aliases'))
 
 
 class Service(StructMap):
+
+    """Struct ``servent`` from ``<netdb.h>``.
+
+    .. py:attribute:: name
+
+       The official name of the service.
+
+    .. py:attribute:: aliases
+
+       List of alternative names for the service.
+
+    .. py:attribute:: port
+
+       The port number of the service.
+
+    .. py:attribute:: proto
+
+       The name of the protocol to use with this service.
+    """
+
     def __init__(self, p):
         super(Service, self).__init__(p)
         self.aliases = list(self._map('aliases'))
 
 
 class Network(StructMap):
+
+    """Struct ``netent`` from ``<netdb.h>``.
+
+    .. py:attribute:: name
+
+       The official name of the network.
+
+    .. py:attribute:: aliases
+
+       List of alternative names for the network.
+
+    .. py:attribute:: addrtype
+
+       Type of the network number; always ``AF_INET``.
+
+    .. py:attribute:: net
+
+       The network number.
+    """
+
     def __init__(self, p):
         super(Network, self).__init__(p)
         self.aliases = list(self._map('aliases'))
 
 
 class Alias(StructMap):
+
+    """Struct ``aliasent`` from ``<aliases.h>``.
+
+    .. py:attribute:: name
+
+       The name of the alias.
+
+    .. py:attribute:: members
+
+       List of members for the alias.
+
+    .. py:attribute:: local
+
+       Local flag.
+    """
+
     def __init__(self, p):
         super(Alias, self).__init__(p)
         self.members = list(self._map('members'))
 
 
 class Group(StructMap):
+
+    """Struct ``grp`` from ``<grp.h>``.
+
+    .. py:attribute:: name
+
+       The name of the group.
+
+    .. py:attribute:: passwd
+
+       The password of the group.
+
+    .. py:attribute:: gid
+
+       The group ID number.
+
+    .. py:attribute:: members
+
+       List of group members.
+    """
+
     def __init__(self, p):
         super(Group, self).__init__(p)
         self.members = list(self._map('members'))
 
 
 class Passwd(StructMap):
+
+    """Struct ``pwd`` from ``<pwd.h>``.
+
+    .. py:attribute:: name
+
+       The username.
+
+    .. py:attribute:: passwd
+
+       The password.
+
+    .. py:attribute:: uid
+
+       The user ID number.
+
+    .. py:attribute:: gid
+
+       The primary group ID number.
+
+    .. py:attribute:: gecos
+
+       User information.
+
+    .. py:attribute:: dir
+
+       Home directory.
+
+    .. py:attribute:: shell
+
+       Shell program.
+    """
+
     pass
 
 
 class Shadow(StructMap):
+
+    """Struct ``spwd`` from ``<shadow.h>``.
+
+    .. py:attribute:: name
+
+       Login name.
+
+    .. py:attribute:: pwd
+
+       Encrypted password.
+
+    .. py:attribute:: change
+
+       Date of last change.
+
+    .. py:attribute:: expire
+
+       Date when account expires.
+
+    .. py:attribute:: min
+
+       Minimum number of days between changes.
+
+    .. py:attribute:: max
+
+       Maximum number of days between changes.
+
+    .. py:attribute:: warn
+
+       Number of days before password expires to warn the user to change it.
+
+    .. py:attribute:: inact
+
+       Number of days after password expires until account is disabled.
+    """
+
     def __init__(self, p):
         super(Shadow, self).__init__(p)
         self.change = datetime.fromtimestamp(p.contents.change)
@@ -121,8 +390,7 @@ class Shadow(StructMap):
 
 
 def alias(search=None):
-    '''
-    Perform a (mail) alias lookup.
+    """Perform a (mail) alias lookup.
 
     To iterate over all alias entries::
 
@@ -134,7 +402,10 @@ def alias(search=None):
         >>> mail = alias('postmaster')
         >>> print mail.members
         root
-    '''
+    """
+    if not callable(setaliasent):
+        raise NotImplementedError
+
     if search is None:
         setaliasent()
         p = True
@@ -148,8 +419,7 @@ def alias(search=None):
 
 
 def host(search=None):
-    '''
-    Perform a host(s) lookup.
+    """Perform a host lookup.
 
     To iterate over all host entries::
 
@@ -163,7 +433,10 @@ def host(search=None):
         >>> server.addrtype in [socket.AF_INET, socket.AF_INET6]
         True
 
-    '''
+    """
+    if not callable(sethostent):
+        raise NotImplementedError
+
     if search is None:
         sethostent()
         p = True
@@ -205,8 +478,7 @@ def host(search=None):
 
 
 def proto(search=None):
-    '''
-    Perform a protocol lookup.
+    """Perform a protocol lookup.
 
     To lookup all protocols::
 
@@ -218,7 +490,10 @@ def proto(search=None):
         >>> tcp = proto('tcp')
         >>> print tcp.proto
         6
-    '''
+    """
+    if not callable(setprotoent):
+        raise NotImplementedError
+
     if search is None:
         setprotoent()
         prt = True
@@ -242,8 +517,7 @@ def proto(search=None):
 
 
 def rpc(search=None):
-    '''
-    Perform a remote procedure call lookup.
+    """Perform a remote procedure call lookup.
 
     To lookup all rpc services::
 
@@ -258,32 +532,34 @@ def rpc(search=None):
         >>> print nfs.aliases
         ['portmap', 'sunrpc']
 
-    '''
+    """
+    if not callable(setrpcent):
+        raise NotImplementedError
+
     if search is None:
         setrpcent()
-        rpc = True
+        ent = True
         res = []
-        while rpc:
-            rpc = getrpcent()
-            if rpc:
-                res.append(RPC(rpc))
+        while ent:
+            ent = getrpcent()
+            if ent:
+                res.append(RPC(ent))
         endrpcent()
         return res
 
     else:
         search = str(search)
         if search.isdigit():
-            rpc = getrpcbynumber(uid_t(int(search)))
+            ent = getrpcbynumber(uid_t(int(search)))
         else:
-            rpc = getrpcbyname(c_char_p(search))
+            ent = getrpcbyname(c_char_p(search))
 
-        if bool(rpc):
-            return RPC(rpc)
+        if bool(ent):
+            return RPC(ent)
 
 
-def service(search=None, proto=None):
-    '''
-    Perform a service lookup.
+def service(search=None, protocol=None):
+    """Perform a service lookup.
 
     To lookup all services::
 
@@ -308,7 +584,7 @@ def service(search=None, proto=None):
         >>> print snmp.port
         161
 
-    '''
+    """
     if search is None:
         setservent()
         srv = True
@@ -322,22 +598,21 @@ def service(search=None, proto=None):
 
     else:
         search = str(search)
-        if not proto and '/' in search:
-            proto, search = search.split('/')
-        if not proto in ['tcp', 'udp']:
-            raise ValueError('Unsupported protocol "%s"' % (str(proto),))
+        if not protocol and '/' in search:
+            protocol, search = search.split('/')
+        if proto not in ['tcp', 'udp']:
+            raise ValueError('Unsupported protocol "%s"' % (str(protocol),))
         if search.isdigit():
-            srv = getservbyport(uid_t(int(search)), c_char_p(proto))
+            srv = getservbyport(uid_t(int(search)), c_char_p(protocol))
         else:
-            srv = getservbyname(c_char_p(search), c_char_p(proto))
+            srv = getservbyname(c_char_p(search), c_char_p(protocol))
 
         if bool(srv):
             return Service(srv)
 
 
 def network(search=None):
-    '''
-    Perform a network lookup.
+    """Perform a network lookup.
 
     To lookup all services::
 
@@ -348,7 +623,7 @@ def network(search=None):
 
         >>> net = network('link-local')
 
-    '''
+    """
     if search is None:
         setnetent()
         net = True
@@ -367,8 +642,7 @@ def network(search=None):
 
 
 def group(search=None):
-    '''
-    Perform a group lookup.
+    """Perform a group lookup.
 
     To lookup all groups::
 
@@ -387,7 +661,7 @@ def group(search=None):
         >>> print root.gid
         0
 
-    '''
+    """
     # Iterate over all group entries
     if search is None:
         setgrent()
@@ -412,8 +686,7 @@ def group(search=None):
 
 
 def passwd(search=None):
-    '''
-    Perform a passwd lookup.
+    """Perform a passwd lookup.
 
     To lookup all passwd entries::
 
@@ -432,7 +705,10 @@ def passwd(search=None):
         >>> print root.uid
         0
 
-    '''
+    """
+    if not callable(setpwent):
+        raise NotImplementedError
+
     # Iterate over all passwd entries
     if search is None:
         setpwent()
@@ -457,8 +733,7 @@ def passwd(search=None):
 
 
 def shadow(search=None):
-    '''
-    Perform a shadow lookup.
+    """Perform a shadow lookup.
 
     To lookup all shadow entries::
 
@@ -471,10 +746,10 @@ def shadow(search=None):
         >>> print root.warn # doctest: +SKIP
         99999
 
-    '''
+    """
     # Iterate over all shadow entries
     if search is None:
-        if setspent is None:
+        if not callable(setspent):
             raise NotImplementedError('Not available on %s' % (sys.platform,))
         setspent()
         spe = True
@@ -487,12 +762,16 @@ def shadow(search=None):
         return res
 
     else:
+        if not callable(getspnam):
+            raise NotImplementedError
+
         spe = getspnam(search)
         if bool(spe):
             return Shadow(spe)
 
 
 if __name__ == '__main__':
+    # pylint: disable=superfluous-parens
     print(dict(host('127.0.0.1')))
     print(dict(host('localhost')))
 
@@ -522,5 +801,5 @@ if __name__ == '__main__':
     try:
         for s in shadow():
             print(s.name, s.change, s.expire, dict(s))
-    except NotImplementedError as e:
-        print('shadow() failed:', e)
+    except NotImplementedError as error:
+        print('shadow() failed:', error)

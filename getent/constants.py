@@ -1,11 +1,11 @@
+"""Constants and types for the getent package."""
+
+# pylint: disable=invalid-name
 
 import sys
 
-from ctypes import CDLL, Structure, Union, cast, pointer # NOQA
-from ctypes import sizeof, byref, create_string_buffer # NOQA
-from ctypes import ARRAY, POINTER # NOQA
-from ctypes import c_void_p, c_uint, c_char, c_int # NOQA
-from ctypes import c_long, c_ulong, c_ubyte, c_ushort # NOQA
+from ctypes import c_uint, c_int
+from ctypes import c_ubyte, c_ushort
 from ctypes import c_char_p as ctypes_c_char_p
 import socket
 
@@ -15,6 +15,7 @@ if sys.version_info[0] < 3:
 
 else:
     def c_char_p(value):
+        """C char pointer."""
         return value.encode('utf-8')
 
 # Socket
@@ -24,10 +25,10 @@ INADDRSZ = 4
 IN6ADDRSZ = 16
 
 # Types
-uint8_t     = c_ubyte
-uint16_t    = c_ushort
-uint32_t    = c_uint
-uid_t       = c_uint
-gid_t       = c_uint
-size_t      = c_int
+uint8_t = c_ubyte
+uint16_t = c_ushort
+uint32_t = c_uint
+uid_t = c_uint
+gid_t = c_uint
+size_t = c_int
 sa_family_t = c_ushort
