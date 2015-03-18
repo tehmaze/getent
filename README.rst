@@ -55,3 +55,7 @@ Build status
 
 .. image:: https://travis-ci.org/tehmaze/getent.svg
    :target: https://travis-ci.org/tehmaze/getent
+
+.. image:: https://coveralls.io/repos/tehmaze/getent/badge.svg
+   :target: https://coveralls.io/r/tehmaze/getent
+
