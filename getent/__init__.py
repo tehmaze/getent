@@ -127,16 +127,8 @@ class StructMap(object):
             yield convert23(obj[i])
             i += 1
 
-#    def __repr__(self):
-#        out = {}
-#        for attr in dir(self.p):
-#            if attr.startswith('_'):
-#                continue
-#
-#            else:
-#                out.update({attr:getattr(self, attr)})
-#        return str(out)
-        
+    def __getitem__(self, attr):
+        return self.p[attr]
 
 
 def _resolve(addrtype, addr):
@@ -326,7 +318,9 @@ class Netgroup(StructMap):
     def __init__(self, p):
         super(Netgroup, self).__init__(p)
         #self.members = list(self._map('members'))
-    #pass
+
+    #def __getitem__(self, key):
+    #    return self.p[key]
 
 
 class Group(StructMap):
@@ -693,9 +687,9 @@ def netgroup(netgroup,host=None,user=None,domain=None):
 
     To lookup one group by netgroup name::
 
-        >>> @netgroup = netgroup()
-        >>> print root.name
-        'root'
+        >>> ng = netgroup(netgroupname)
+        >>> print ng.name
+        'netgroupname'
 
     """
     host,user,domain = c_char_p(None),c_char_p(None),c_char_p(None)
@@ -708,7 +702,6 @@ def netgroup(netgroup,host=None,user=None,domain=None):
     else:
         # True or False
         netgrp = setnetgrent(netgroup)
-        res = []
         members = []
         while netgrp:
             # getnetgrent need pointers to be written
@@ -717,8 +710,7 @@ def netgroup(netgroup,host=None,user=None,domain=None):
                 #res.append(Netgroup(netgrp))
                 members.append({ 'host':host.value,'user':user.value,'domain':domain.value })
         endnetgrent()
-        res.append(Netgroup({'name':netgroup,'members':members}))
-        return res
+        return Netgroup({'name':netgroup,'members':members})
 
 
 def group(search=None):
