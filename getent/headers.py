@@ -129,6 +129,18 @@ class ServiceStruct(Structure):
     ]
 
 
+class NetgroupStruct(Structure):
+
+    """Struct `netgroup` from `<netgroup.h>`."""
+
+    _fields_ = [
+        ("name", ctypes_c_char_p),
+        ("host", ctypes_c_char_p),
+        ("user", ctypes_c_char_p),
+        ("domain", ctypes_c_char_p),
+    ]
+
+
 class GroupStruct(Structure):
 
     """Struct `group` from `<grp.h>`."""

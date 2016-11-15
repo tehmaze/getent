@@ -5,8 +5,9 @@
 import socket
 import struct
 import sys
-from ctypes import POINTER, cast, create_string_buffer, pointer
+from ctypes import POINTER, cast, create_string_buffer, pointer, byref as _byref
 from datetime import datetime
+from pprint import pprint
 
 from getent import headers
 from getent.constants import (
@@ -24,6 +25,7 @@ from getent.libc import (
     getpwuid,
     endaliasent,
     endgrent,
+    endnetgrent,
     endhostent,
     endnetent,
     endprotoent,
@@ -33,6 +35,7 @@ from getent.libc import (
     endspent,
     getaliasent,
     getgrent,
+    getnetgrent,
     getgrgid,
     getgrnam,
     getrpcbyname,
@@ -51,6 +54,7 @@ from getent.libc import (
     inet_pton,
     setaliasent,
     setgrent,
+    setnetgrent,
     sethostent,
     setnetent,
     setprotoent,
@@ -65,7 +69,7 @@ from getent.libc import (
 
 __all__ = (
     'alias', 'group', 'host', 'network', 'passwd', 'proto', 'rpc', 'service',
-    'shadow'
+    'shadow', 'netgroup'
 )
 
 if sys.version_info[0] < 3:
@@ -89,36 +93,69 @@ class StructMap(object):
         Will also define getter and setter attributes on the instance for all
         struct members.
         """
-        self.p = p
+        #pprint(dir(self))
+        if(hasattr(p, "contents")):
+            self.p = p.contents
+        else:
+            pprint("qui")
+            self.p = p
+        pprint("regex")
+        pprint(dir(self.p))
 
-        for attr in dir(self.p.contents):
+        for attr in dir(self.p):
 
             if attr.startswith('_'):
                 continue
 
             elif not hasattr(self, attr):
-                value = getattr(self.p.contents, attr)
+                print("quo")
+                value = getattr(self.p, attr)
                 setattr(self, attr, convert23(value))
+                print("qua %s %s" % (attr, value))
 
     def __iter__(self):
         """Iterate over the mapped struct members.
 
         Yields `(key, value)` pairs.
         """
-        for attr in dir(self.p.contents):
+        #pprint(dir(self))
+        #for attr in dir(self.p.contents):
+        print("ppri")
+        for attr in dir(self.p):
             if attr.startswith('_'):
                 continue
 
             else:
+                print("ppro")
                 yield (attr, getattr(self, attr))
+                print("ppra %s" % attr)
 
     def _map(self, attr):
+        #pprint(dir(self))
         i = 0
-        obj = getattr(self.p.contents, attr)
+        #obj = getattr(self.p.contents, attr)
+        print("qpri")
+        pprint(dir(self))
+        obj = getattr(self.p, attr)
 
         while obj[i]:
             yield convert23(obj[i])
             i += 1
+
+#    def __repr__(self):
+#        out = {}
+#        for attr in dir(self.p):
+#            if attr.startswith('_'):
+#                continue
+#
+#            else:
+#                print("ypro")
+#                out.update({attr:getattr(self, attr)})
+#                print("ypra %s" % attr)
+#        return str(out)
+#
+#       #return str(self)
+        
 
 
 def _resolve(addrtype, addr):
@@ -282,6 +319,33 @@ class Alias(StructMap):
     def __init__(self, p):
         super(Alias, self).__init__(p)
         self.members = list(self._map('members'))
+
+
+class Netgroup(StructMap):
+
+    """Struct ``netgroup`` from ``<netgroup.h>``.
+
+    .. py:attribute:: netgroup
+
+       The name of the netgroup.
+
+    .. py:attribute:: name
+
+       The user allowed for the netgroup. * is a wildcard.
+
+    .. py:attribute:: host
+
+       The host allowed for the netgroup. * is a wildcard.
+
+    .. py:attribute:: domain
+
+       The domain allowed for the netgroup. * is a wildcard.
+    """
+
+    def __init__(self, p):
+        super(Netgroup, self).__init__(p)
+        #self.members = list(self._map('members'))
+    #pass
 
 
 class Group(StructMap):
@@ -639,6 +703,41 @@ def network(search=None):
         net = getnetbyname(c_char_p(search))
         if bool(net):
             return Network(net)
+
+
+def netgroup(netgroup,host=None,user=None,domain=None):
+    """Perform a netgroup lookup.
+
+    Enumeration is not supported on netgroup, so either one or three keys must be provided.
+
+    To lookup one group by netgroup name::
+
+        >>> @netgroup = netgroup()
+        >>> print root.name
+        'root'
+
+    """
+    host,user,domain = c_char_p(None),c_char_p(None),c_char_p(None)
+
+    # If netgroup is None, fatal error
+    if netgroup is None:
+        return Netgroup(False)
+        #return None
+
+    else:
+        # True or False
+        netgrp = setnetgrent(netgroup)
+        res = []
+        members = []
+        while netgrp:
+            # getnetgrent need pointers to be written
+            netgrp = getnetgrent(_byref(host), _byref(user), _byref(domain))
+            if netgrp:
+                #res.append(Netgroup(netgrp))
+                members.append({ 'host':host.value,'user':user.value,'domain':domain.value })
+        endnetgrent()
+        res.append(Netgroup({'name':netgroup,'members':members}))
+        return res
 
 
 def group(search=None):
