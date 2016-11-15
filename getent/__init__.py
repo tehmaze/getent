@@ -7,7 +7,6 @@ import struct
 import sys
 from ctypes import POINTER, cast, create_string_buffer, pointer, byref as _byref
 from datetime import datetime
-from pprint import pprint
 
 from getent import headers
 from getent.constants import (
@@ -93,14 +92,10 @@ class StructMap(object):
         Will also define getter and setter attributes on the instance for all
         struct members.
         """
-        #pprint(dir(self))
         if(hasattr(p, "contents")):
             self.p = p.contents
         else:
-            pprint("qui")
             self.p = p
-        pprint("regex")
-        pprint(dir(self.p))
 
         for attr in dir(self.p):
 
@@ -108,34 +103,24 @@ class StructMap(object):
                 continue
 
             elif not hasattr(self, attr):
-                print("quo")
                 value = getattr(self.p, attr)
                 setattr(self, attr, convert23(value))
-                print("qua %s %s" % (attr, value))
 
     def __iter__(self):
         """Iterate over the mapped struct members.
 
         Yields `(key, value)` pairs.
         """
-        #pprint(dir(self))
-        #for attr in dir(self.p.contents):
-        print("ppri")
         for attr in dir(self.p):
             if attr.startswith('_'):
                 continue
 
             else:
-                print("ppro")
                 yield (attr, getattr(self, attr))
-                print("ppra %s" % attr)
 
     def _map(self, attr):
-        #pprint(dir(self))
         i = 0
         #obj = getattr(self.p.contents, attr)
-        print("qpri")
-        pprint(dir(self))
         obj = getattr(self.p, attr)
 
         while obj[i]:
@@ -149,12 +134,8 @@ class StructMap(object):
 #                continue
 #
 #            else:
-#                print("ypro")
 #                out.update({attr:getattr(self, attr)})
-#                print("ypra %s" % attr)
 #        return str(out)
-#
-#       #return str(self)
         
 
 
