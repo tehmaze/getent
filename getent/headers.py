@@ -12,6 +12,7 @@ from getent.constants import size_t, uint8_t, uint16_t, uint32_t
 __all__ = (
     'AliasStruct',
     'GroupStruct',
+    'NetgroupStruct',
     'HostStruct',
     'InAddr6Struct',
     'InAddr6Union',

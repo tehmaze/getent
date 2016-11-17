@@ -317,10 +317,6 @@ class Netgroup(StructMap):
 
     def __init__(self, p):
         super(Netgroup, self).__init__(p)
-        #self.members = list(self._map('members'))
-
-    #def __getitem__(self, key):
-    #    return self.p[key]
 
 
 class Group(StructMap):
