@@ -6,7 +6,7 @@ setup(
     author       = 'Wijnand Modderman-Lenstra',
     author_email = 'maze@pyth0n.org',
     description  = 'Python interface to the POSIX getent family of commands',
-    long_description = file('README.rst').read(),
+    long_description = open('README.rst').read(),
     license      = 'MIT',
     keywords     = 'getent group passwd shadow network alias host',
     packages     = ['getent'],
