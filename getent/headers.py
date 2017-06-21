@@ -12,6 +12,7 @@ from getent.constants import size_t, uint8_t, uint16_t, uint32_t
 __all__ = (
     'AliasStruct',
     'GroupStruct',
+    'NetgroupStruct',
     'HostStruct',
     'InAddr6Struct',
     'InAddr6Union',
@@ -126,6 +127,18 @@ class ServiceStruct(Structure):
         ('aliases', POINTER(ctypes_c_char_p)),  # alias list
         ('port', c_int),                # port number
         ('proto', ctypes_c_char_p),            # protocol to use
+    ]
+
+
+class NetgroupStruct(Structure):
+
+    """Struct `netgroup` from `<netgroup.h>`."""
+
+    _fields_ = [
+        ("name", ctypes_c_char_p),
+        ("host", ctypes_c_char_p),
+        ("user", ctypes_c_char_p),
+        ("domain", ctypes_c_char_p),
     ]
 
 

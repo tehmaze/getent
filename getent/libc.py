@@ -11,6 +11,7 @@ from getent.constants import ctypes_c_char_p, gid_t, uid_t
 
 __all__ = (
     'endgrent',
+    'endnetgrent',
     'endhostent',
     'endnetent',
     'endprotoent',
@@ -19,6 +20,7 @@ __all__ = (
     'endservent',
     'endspent',
     'getgrent',
+    'getnetgrent',
     'getgrgid',
     'getgrnam',
     'gethostbyaddr',
@@ -42,6 +44,7 @@ __all__ = (
     'inet_pton',
     'libc',
     'setgrent',
+    'setnetgrent',
     'sethostent',
     'setnetent',
     'setprotoent',
@@ -115,6 +118,16 @@ else:
     endservent = None
     getservent = None
     setservent = None
+
+if hasattr(libc, 'getnetgrent'):
+    endnetgrent = libc.endnetgrent
+    getnetgrent = libc.getnetgrent
+    getnetgrent.restype = POINTER(headers.NetgroupStruct)
+    setnetgrent = libc.setnetgrent
+else:
+    endnetgrent = None
+    getnetgrent = None
+    setnetgrent = None
 
 if hasattr(libc, 'getgrent'):
     endgrent = libc.endgrent
